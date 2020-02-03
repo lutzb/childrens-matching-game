@@ -128,14 +128,9 @@
     outputAndHideImages();
 
     $('#container').on('click', 'li', function() {
-      if ($(this).children('.tile-image').hasClass('face-up') === false && count < 2 && fading === false) {
-      
-        // increment guess count, hide tile text and paw print, show tile image, mark it as face up
+      if ($(this).children('.tile-image').hasClass('face-up') === false && count < 2 && !fading) {
         count++;
-        $(this).children('.tile-image-front').hide();
-        $(this).children('.tile-image').show();
-        $(this).children('.tile-text').hide();
-        $(this).children('.tile-image').addClass('face-up');
+        flipTileFaceUp(this);
         
         // guess #1
         if (count === 1 ) { 
@@ -146,47 +141,7 @@
         else if (count === 2) { 
           guess2 = $(this).children('.tile-image').attr('src'); 
           
-          // check for match
-          if (guess1 === guess2) { 
-            matches++;
-            
-            // remove previous style and add match style -- this will be applied to guess1 and guess2 since they have the same src
-            $('li').children("img[src='" + guess1 + "']").parents().removeClass('image-tile-colors');
-            $('li').children("img[src='" + guess1 + "']").parent().addClass("match");
-            count = 0;
-          }
-          
-          // else it's a miss
-          else { 
-            fading = true;
-            
-            setTimeout(function() {
-              // reset guess count
-              count = 0;
-              
-              // fade images out
-              $("img[src='" + guess1 + "']").fadeOut(250);
-              $("img[src='" + guess1 + "']").removeClass("face-up");
-              $("img[src='" + guess2 + "']").fadeOut(250);
-              $("img[src='" + guess2 + "']").removeClass("face-up");
-            }, 800);
-            
-            setTimeout(function() {
-              // show tile text and paw print, for both tiles, AFTER images have faded out
-              $("img[src='" + guess1 + "']").parent().children('.tile-text').fadeIn(250);
-              $("img[src='" + guess1 + "']").parent().children('.tile-image-front').fadeIn(250);
-              
-              $("img[src='" + guess2 + "']").parent().children('.tile-text').fadeIn(250);
-              $("img[src='" + guess2 + "']").parent().children('.tile-image-front').fadeIn(250);
-              fading = false;
-            }, 1050);
-          }
-
-          // check if the user matched all images
-          if (matches === 8) {
-            $('#modal-overlay').fadeIn("slow");
-            $('#modal').fadeIn("slow");
-          }
+          checkForMatch();
         }
       }
     });
@@ -253,6 +208,58 @@
       outputAndHideImages();
       $('#modal-overlay').fadeOut(250); 
       $('#modal').fadeOut(250)();
+    }
+
+    function checkForMatch() {
+      if (guess1 === guess2) { 
+        matches++;
+        
+        // remove previous style and add match style -- this will be applied to guess1 and guess2 since they have the same src
+        $('li').children("img[src='" + guess1 + "']").parents().removeClass('image-tile-colors');
+        $('li').children("img[src='" + guess1 + "']").parent().addClass("match");
+        count = 0;
+      }
+      
+      // else it's a miss
+      else { 
+        fading = true;
+        count = 0;
+        flipTilesFaceDown();
+        showTileTextAndPawPrint();
+      }
+
+      // check if the user matched all images
+      if (matches === 8) {
+        $('#modal-overlay').fadeIn("slow");
+        $('#modal').fadeIn("slow");
+      }
+    }
+
+    function flipTileFaceUp(tile) {
+      $(tile).children('.tile-image-front').hide();
+      $(tile).children('.tile-image').show();
+      $(tile).children('.tile-text').hide();
+      $(tile).children('.tile-image').addClass('face-up');
+    }
+
+    function flipTilesFaceDown() {
+      setTimeout(function() {
+        $("img[src='" + guess1 + "']").fadeOut(250);
+        $("img[src='" + guess1 + "']").removeClass("face-up");
+        $("img[src='" + guess2 + "']").fadeOut(250);
+        $("img[src='" + guess2 + "']").removeClass("face-up");
+      }, 800);
+    }
+
+    function showTileTextAndPawPrint() {
+      setTimeout(function() {
+        // show tile text and paw print, for both tiles, AFTER images have faded out
+        $("img[src='" + guess1 + "']").parent().children('.tile-text').fadeIn(250);
+        $("img[src='" + guess1 + "']").parent().children('.tile-image-front').fadeIn(250);
+        $("img[src='" + guess2 + "']").parent().children('.tile-text').fadeIn(250);
+        $("img[src='" + guess2 + "']").parent().children('.tile-image-front').fadeIn(250);
+        fading = false;
+      }, 1050);
     }
   </script>
 </html>
